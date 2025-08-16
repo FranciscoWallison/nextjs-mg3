@@ -1,38 +1,107 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// prisma/schema.prisma
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+// Docs: https://pris.ly/d/prisma-schema
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url      = "postgresql://postgres:postgres@localhost:5432/meu_banco?schema=public"
 }
 
+//
+// ─────────────────────────────  MODELS  ─────────────────────────────
+//
 
 model Condominio {
-  id           String    @id @default(uuid())
-  name         String
-  cnpj         String? // O '?' indica que este campo é opcional
-  address      String
-  neighborhood String
-  city         String
-  state        String
-  type         String    // Ex: "Residencial" ou "Comercial"
-  imageUrl     String?   // Opcional para a foto
+  id String @id @default(uuid())
 
-  // --- Campos Padrão para Gerenciamento ---
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  // Defina tamanhos razoáveis p/ índices ficarem mais eficientes
+  name         String  @db.VarChar(120)
+  cnpj         String? @unique // Postgres permite vários NULLs; garante unicidade quando preenchido
+  address      String  @db.VarChar(160)
+  neighborhood String  @db.VarChar(80)
+  city         String  @db.VarChar(80)
+  state        String  @db.VarChar(2) // Ex.: "CE", "SP"
+  type         String  @db.VarChar(30)
+  imageUrl     String? @db.VarChar(255)
 
-  // --- Relacionamento (Bônus, baseado no seu formulário) ---
-  // Para o campo "Condomínio de referência"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Auto-referência (pai/filho de condomínio)
   referenceId  String?
-  reference    Condominio? @relation("CondominioReferencia", fields: [referenceId], references: [id])
-  referencedBy Condominio[]  @relation("CondominioReferencia")
+  reference    Condominio?  @relation(name: "CondominioReferencia", fields: [referenceId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  referencedBy Condominio[] @relation(name: "CondominioReferencia")
+
+  // Relação 1 -> N: um condomínio tem vários cronogramas
+  cronogramas Cronograma[]
+
+  // Opcional: evita duplicatas exatas por "nome+cidade+estado"
+  // @@unique([name, city, state])
+
+  // ── ÍNDICES ────────────────────────────────────────────────────────
+  @@index([city, state])
+  @@index([state]) // útil se pesquisar só por estado
+  @@index([name])
+  @@index([referenceId])
+}
+
+model User {
+  id    String  @id @default(uuid())
+  email String  @unique
+  name  String? @db.VarChar(120)
+
+  // Defina tamanho do hash pra evitar lixo; 60 cobre bcrypt, 95+ cobre argon2id.
+  passwordHash String @db.VarChar(255)
+
+  // Opcional: papéis simples (enum abaixo)
+  role Role @default(USER)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // ── Se quiser rastrear autoria dos condomínios, descomente no Condominio também ──
+  // condominios Criados Condominio[] @relation("CondominioCreatedBy")
+
+  // relacionamento opcional com cronogramas (responsável)
+  cronogramasResponsavel Cronograma[] @relation("CronogramaResponsavel")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+/// ------------------ Modelo Cronograma ------------------
+
+model Cronograma {
+  id              String   @id @default(uuid())
+  title           String   @db.VarChar(150)
+  status          String   @db.VarChar(50)  // Ex.: "Próximas", "Em andamento", "Pendente", "Histórico"
+
+  // relação com condomínio (1 Condominio -> N Cronograma)
+  condominioId    String
+  condominio      Condominio @relation(fields: [condominioId], references: [id], onDelete: Cascade)
+
+  budgetStatus    String?  @db.VarChar(50)   // "aprovado", "pendente", "sem orçamento"
+  budget          Decimal? @db.Decimal(10, 2) // opcional: valor orçamentário
+  expectedDate    DateTime                      // data prevista/exibição no calendário
+  frequency       String?  @db.VarChar(50)   // "Mensal", "Anual", "Não se repete", etc.
+  team            String?  @db.VarChar(100)  // "Equipe interna", "Terceirizada", etc.
+  appliedStandard String?  @db.VarChar(100)  // "NR-35", "ABNT NBR 1604", etc.
+  location        String?  @db.VarChar(150)
+  responsibles    String?  @db.VarChar(255)  // texto com responsáveis (pode ser lista separada por vírgula)
+  observations    String?  @db.Text
+
+  // opcional: vincular um usuário responsável (se desejar)
+  responsibleId   String? 
+  responsible     User? @relation(name: "CronogramaResponsavel", fields: [responsibleId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([condominioId])
 }
