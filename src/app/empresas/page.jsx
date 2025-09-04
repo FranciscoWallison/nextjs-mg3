@@ -1,4 +1,3 @@
-// src/app/empresas/page.jsx
 "use client";
 
 import { useState } from "react";
@@ -13,10 +12,12 @@ import {
   Tooltip,
   Snackbar,
   Alert,
+  useTheme,
 } from "@mui/material";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 
 export default function EmpresasPage() {
+  const theme = useTheme(); // pega o tema atual
   const [name, setName] = useState("");
   const [cnpj, setCnpj] = useState("");
   const [email, setEmail] = useState("");
@@ -44,7 +45,6 @@ export default function EmpresasPage() {
       });
 
       let data = null;
-      // tenta parsear JSON, mas sem quebrar se vier vazio no 500
       try {
         data = await res.json();
       } catch {}
@@ -56,18 +56,15 @@ export default function EmpresasPage() {
             Object.values(data.issues.fieldErrors).flat().join(", ")) ||
           "Erro ao criar empresa";
 
-        // 5xx => esconde formulário e mostra painel de erro
         if (res.status >= 500) {
           setError(backendMsg);
           setView("error");
           return;
         }
 
-        // 4xx => mantém form aberto com mensagem
         throw new Error(backendMsg);
       }
 
-      // 200 OK -> mostra resultado e esconde formulário
       setResult(data);
       setView("result");
     } catch (err) {
@@ -96,10 +93,10 @@ export default function EmpresasPage() {
         display: "flex",
         flexDirection: { xs: "column", md: "row" },
         height: "100vh",
-        backgroundColor: "#f5f5f5",
+        backgroundColor: theme.palette.background.default,
       }}
     >
-      {/* Lado esquerdo: formulário (mesmo layout da tela de cadastro) */}
+      {/* Lado esquerdo */}
       <Box
         component="form"
         onSubmit={handleCreate}
@@ -110,16 +107,19 @@ export default function EmpresasPage() {
           flexDirection: "column",
           justifyContent: "center",
           alignItems: "center",
-          backgroundColor: "#ffffff",
+          backgroundColor: theme.palette.background.paper,
         }}
       >
         <Box mb={2}>
           <img src="/simple-logo.png" alt="Logo" style={{ width: 100 }} />
         </Box>
-        {/* FORM - só aparece quando view === 'form' */}
+
         {view === "form" && (
           <>
-            <Typography variant="h5" sx={{ mb: 2, fontWeight: "bold" }}>
+            <Typography
+              variant="h5"
+              sx={{ mb: 2, fontWeight: "bold", color: theme.palette.text.primary }}
+            >
               Nova empresa
             </Typography>
 
@@ -173,20 +173,22 @@ export default function EmpresasPage() {
               sx={{
                 mt: 3,
                 mb: 2,
-                backgroundColor: "#545454",
-                color: "#ffffff",
+                backgroundColor: theme.palette.mode === "light" ? "#545454" : "#ccc",
+                color: theme.palette.getContrastText(theme.palette.mode === "light" ? "#545454" : "#ccc"),
                 fontWeight: "bold",
                 maxWidth: 400,
                 borderRadius: 2,
                 padding: "10px 0",
-                "&:hover": { backgroundColor: "#333" },
+                "&:hover": {
+                  backgroundColor: theme.palette.mode === "light" ? "#333" : "#999",
+                },
               }}
             >
               {submitting ? "CRIANDO..." : "CRIAR EMPRESA"}
             </Button>
           </>
         )}
-        {/* ERRO 500 - esconde o form e mostra isto */}
+
         {view === "error" && (
           <Box sx={{ width: "100%", maxWidth: 400 }}>
             <Alert severity="error" sx={{ mb: 2 }}>
@@ -201,8 +203,8 @@ export default function EmpresasPage() {
               }}
               sx={{
                 borderRadius: 2,
-                backgroundColor: "#545454",
-                "&:hover": { backgroundColor: "#333" },
+                backgroundColor: theme.palette.mode === "light" ? "#545454" : "#ccc",
+                "&:hover": { backgroundColor: theme.palette.mode === "light" ? "#333" : "#999" },
               }}
             >
               Tentar novamente
@@ -210,7 +212,6 @@ export default function EmpresasPage() {
           </Box>
         )}
 
-        {/* RESULTADO - só aparece quando view === 'result' */}
         {view === "result" && result && (
           <Box
             sx={{
@@ -218,24 +219,27 @@ export default function EmpresasPage() {
               maxWidth: 400,
               p: 2,
               borderRadius: 2,
-              backgroundColor: "#f9f9f9",
-              border: "1px solid #eee",
+              backgroundColor: theme.palette.background.paper,
+              border: `1px solid ${theme.palette.divider}`,
             }}
           >
-            <Typography variant="subtitle1" sx={{ fontWeight: "bold", mb: 1 }}>
+            <Typography
+              variant="subtitle1"
+              sx={{ fontWeight: "bold", mb: 1, color: theme.palette.text.primary }}
+            >
               Empresa criada
             </Typography>
 
             <Box sx={{ mb: 1 }}>
-              <Typography variant="caption" sx={{ color: "text.secondary" }}>
+              <Typography variant="caption" sx={{ color: theme.palette.text.secondary }}>
                 Token da empresa
               </Typography>
               <Box
                 sx={{
                   display: "flex",
                   alignItems: "center",
-                  bgcolor: "#fff",
-                  border: "1px solid #eee",
+                  bgcolor: theme.palette.background.default,
+                  border: `1px solid ${theme.palette.divider}`,
                   borderRadius: 1,
                   px: 1.5,
                   py: 1,
@@ -249,6 +253,7 @@ export default function EmpresasPage() {
                     fontSize: 13,
                     flex: 1,
                     wordBreak: "break-all",
+                    color: theme.palette.text.primary,
                   }}
                 >
                   {result.empresaToken}
@@ -257,9 +262,7 @@ export default function EmpresasPage() {
                 <Tooltip title="Copiar token">
                   <IconButton
                     size="small"
-                    onClick={() =>
-                      handleCopy(result.empresaToken, "Token copiado!")
-                    }
+                    onClick={() => handleCopy(result.empresaToken, "Token copiado!")}
                   >
                     <ContentCopyIcon fontSize="inherit" />
                   </IconButton>
@@ -268,7 +271,7 @@ export default function EmpresasPage() {
             </Box>
 
             <Box sx={{ mb: 1 }}>
-              <Typography variant="caption" sx={{ color: "text.secondary" }}>
+              <Typography variant="caption" sx={{ color: theme.palette.text.secondary }}>
                 Link de cadastro
               </Typography>
 
@@ -276,8 +279,8 @@ export default function EmpresasPage() {
                 sx={{
                   display: "flex",
                   alignItems: "center",
-                  bgcolor: "#fff",
-                  border: "1px solid #eee",
+                  bgcolor: theme.palette.background.default,
+                  border: `1px solid ${theme.palette.divider}`,
                   borderRadius: 1,
                   px: 1.5,
                   py: 1,
@@ -291,6 +294,7 @@ export default function EmpresasPage() {
                     fontSize: 13,
                     flex: 1,
                     wordBreak: "break-all",
+                    color: theme.palette.text.primary,
                   }}
                 >
                   {linkCadastro}
@@ -327,7 +331,7 @@ export default function EmpresasPage() {
                   setCnpj("");
                   setResult(null);
                   setError("");
-                  setView("form"); // volta pro formulário pra criar outra
+                  setView("form");
                 }}
               >
                 Criar outra
@@ -349,7 +353,7 @@ export default function EmpresasPage() {
         </Button>
       </Box>
 
-      {/* Lado direito: imagem (mesmo do cadastro) */}
+      {/* Lado direito */}
       <Box
         sx={{
           flex: 1,
@@ -359,7 +363,7 @@ export default function EmpresasPage() {
           backgroundPosition: "center",
           height: { xs: 250, md: "auto" },
           minHeight: { xs: 250, md: "100vh" },
-          backgroundColor: "#f5f5f5",
+          backgroundColor: theme.palette.background.default,
         }}
       />
 

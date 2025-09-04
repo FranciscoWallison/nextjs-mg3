@@ -82,7 +82,7 @@ function PageInner() {
           <Button
             startIcon={<GetAppIcon />}
             variant="outlined"
-            color="secondary"
+            color="primary" // usa cor do tema, claro ou escuro
             sx={{ width: { xs: "100%", sm: "auto" } }}
           >
             Extrair Relatório
@@ -125,7 +125,7 @@ function PageInner() {
               ))
             ) : (
               <Grid
-                sx={{ textAlign: "center", width: "100%,", mt: 8 }}
+                sx={{ textAlign: "center", width: "100%", mt: 8 }}
                 item
                 xs={12}
               >

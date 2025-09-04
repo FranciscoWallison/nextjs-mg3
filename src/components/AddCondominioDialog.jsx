@@ -1,8 +1,6 @@
-// src/components/AddCondominioDialog.jsx
 "use client";
 
 import { useState, useEffect } from "react";
-
 import {
   Dialog,
   DialogContent,
@@ -22,6 +20,7 @@ import {
   Stack,
   Paper,
   Divider,
+  useTheme,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import AttachmentIcon from "@mui/icons-material/Attachment";
@@ -38,6 +37,7 @@ const INITIAL_VALUES = {
 };
 
 export default function AddCondominioDialog({ open, onClose, onSave }) {
+  const theme = useTheme();
   const [values, setValues] = useState(INITIAL_VALUES);
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
@@ -57,7 +57,6 @@ export default function AddCondominioDialog({ open, onClose, onSave }) {
   };
 
   const handleClose = () => {
-    // (Opcional) limpar também ao cancelar/fechar
     setValues(INITIAL_VALUES);
     setErrors({});
     onClose();
@@ -66,14 +65,7 @@ export default function AddCondominioDialog({ open, onClose, onSave }) {
   const handleSubmit = async (event) => {
     event.preventDefault();
     const newErrors = {};
-    const requiredFields = [
-      "name",
-      "address",
-      "neighborhood",
-      "state",
-      "city",
-      "type",
-    ];
+    const requiredFields = ["name", "address", "neighborhood", "state", "city", "type"];
     requiredFields.forEach((f) => {
       if (!values[f]?.trim()) newErrors[f] = "Este campo é obrigatório";
     });
@@ -85,12 +77,8 @@ export default function AddCondominioDialog({ open, onClose, onSave }) {
     try {
       setSubmitting(true);
       await onSave({ ...values, referenceId: values.reference || null });
-
-      // 🔑 sempre limpar após salvar
       setValues(INITIAL_VALUES);
       setErrors({});
-
-      // se quiser continuar com o modal aberto para "cadastrar outro", remova esta linha:
       onClose();
     } catch (e) {
       setErrors((err) => ({ ...err, form: e.message || "Falha ao salvar" }));
@@ -107,12 +95,13 @@ export default function AddCondominioDialog({ open, onClose, onSave }) {
           alignItems: "center",
           justifyContent: "space-between",
           p: 2,
+          bgcolor: theme.palette.background.paper,
         }}
       >
-        <Typography variant="h6" component="h2" sx={{ fontWeight: "bold" }}>
+        <Typography variant="h6" component="h2" sx={{ fontWeight: "bold", color: theme.palette.text.primary }}>
           Adicionar Condomínio
         </Typography>
-        <IconButton onClick={onClose} aria-label="Fechar">
+        <IconButton onClick={onClose} aria-label="Fechar" sx={{ color: theme.palette.text.secondary }}>
           <CloseIcon />
         </IconButton>
       </Box>
@@ -122,13 +111,16 @@ export default function AddCondominioDialog({ open, onClose, onSave }) {
       <Box component="form" onSubmit={handleSubmit} noValidate>
         <DialogContent>
           <Stack spacing={3} sx={{ pt: 1 }}>
-            {/* Seção 1: Dados básicos */}
-            <Paper variant="outlined" sx={{ p: 2, borderRadius: "8px" }}>
-              <Typography
-                variant="subtitle1"
-                gutterBottom
-                sx={{ fontWeight: "medium" }}
-              >
+            {/* Seção 1 */}
+            <Paper
+              variant="outlined"
+              sx={{
+                p: 2,
+                borderRadius: "8px",
+                bgcolor: theme.palette.background.paper,
+              }}
+            >
+              <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: "medium", color: theme.palette.text.primary }}>
                 Dados Básicos
               </Typography>
               <Grid container spacing={2} sx={{ mt: 0.5 }}>
@@ -157,13 +149,16 @@ export default function AddCondominioDialog({ open, onClose, onSave }) {
               </Grid>
             </Paper>
 
-            {/* Seção 2: Localização */}
-            <Paper variant="outlined" sx={{ p: 2, borderRadius: "8px" }}>
-              <Typography
-                variant="subtitle1"
-                gutterBottom
-                sx={{ fontWeight: "medium" }}
-              >
+            {/* Seção 2 */}
+            <Paper
+              variant="outlined"
+              sx={{
+                p: 2,
+                borderRadius: "8px",
+                bgcolor: theme.palette.background.paper,
+              }}
+            >
+              <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: "medium", color: theme.palette.text.primary }}>
                 Localização
               </Typography>
               <Grid container spacing={2} sx={{ mt: 0.5 }}>
@@ -192,13 +187,7 @@ export default function AddCondominioDialog({ open, onClose, onSave }) {
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                  <FormControl
-                    fullWidth
-                    variant="outlined"
-                    error={!!errors.state}
-                    required
-                    sx={{ minWidth: 220 }}
-                  >
+                  <FormControl fullWidth variant="outlined" error={!!errors.state} required>
                     <InputLabel id="state-select-label">*Estado</InputLabel>
                     <Select
                       labelId="state-select-label"
@@ -207,9 +196,7 @@ export default function AddCondominioDialog({ open, onClose, onSave }) {
                       onChange={handleChange("state")}
                       label="*Estado"
                     >
-                      <MenuItem value="">
-                        <em>Selecione</em>
-                      </MenuItem>
+                      <MenuItem value=""><em>Selecione</em></MenuItem>
                       <MenuItem value="SP">São Paulo</MenuItem>
                       <MenuItem value="RJ">Rio de Janeiro</MenuItem>
                     </Select>
@@ -217,13 +204,7 @@ export default function AddCondominioDialog({ open, onClose, onSave }) {
                   </FormControl>
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                  <FormControl
-                    fullWidth
-                    variant="outlined"
-                    error={!!errors.city}
-                    required
-                    sx={{ minWidth: 220 }}
-                  >
+                  <FormControl fullWidth variant="outlined" error={!!errors.city} required>
                     <InputLabel id="city-select-label">*Cidade</InputLabel>
                     <Select
                       labelId="city-select-label"
@@ -232,9 +213,7 @@ export default function AddCondominioDialog({ open, onClose, onSave }) {
                       onChange={handleChange("city")}
                       label="*Cidade"
                     >
-                      <MenuItem value="">
-                        <em>Selecione</em>
-                      </MenuItem>
+                      <MenuItem value=""><em>Selecione</em></MenuItem>
                       <MenuItem value="sao_paulo">São Paulo</MenuItem>
                       <MenuItem value="rio">Rio de Janeiro</MenuItem>
                     </Select>
@@ -244,24 +223,21 @@ export default function AddCondominioDialog({ open, onClose, onSave }) {
               </Grid>
             </Paper>
 
-            {/* Seção 3: Detalhes Adicionais */}
-            <Paper variant="outlined" sx={{ p: 2, borderRadius: "8px" }}>
-              <Typography
-                variant="subtitle1"
-                gutterBottom
-                sx={{ fontWeight: "medium" }}
-              >
+            {/* Seção 3 */}
+            <Paper
+              variant="outlined"
+              sx={{
+                p: 2,
+                borderRadius: "8px",
+                bgcolor: theme.palette.background.paper,
+              }}
+            >
+              <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: "medium", color: theme.palette.text.primary }}>
                 Detalhes Adicionais
               </Typography>
               <Grid container spacing={2} sx={{ mt: 0.5 }}>
                 <Grid item xs={12} sm={6}>
-                  <FormControl
-                    fullWidth
-                    variant="outlined"
-                    error={!!errors.type}
-                    required
-                    sx={{ minWidth: 250 }}
-                  >
+                  <FormControl fullWidth variant="outlined" error={!!errors.type} required>
                     <InputLabel id="type-select-label">*Tipo</InputLabel>
                     <Select
                       labelId="type-select-label"
@@ -270,9 +246,7 @@ export default function AddCondominioDialog({ open, onClose, onSave }) {
                       onChange={handleChange("type")}
                       label="*Tipo"
                     >
-                      <MenuItem value="">
-                        <em>Selecione</em>
-                      </MenuItem>
+                      <MenuItem value=""><em>Selecione</em></MenuItem>
                       <MenuItem value="Residencial">Residencial</MenuItem>
                       <MenuItem value="Comercial">Comercial</MenuItem>
                     </Select>
@@ -288,8 +262,7 @@ export default function AddCondominioDialog({ open, onClose, onSave }) {
                     InputProps={{
                       endAdornment: (
                         <InputAdornment position="end">
-                          {" "}
-                          <AttachmentIcon />{" "}
+                          <AttachmentIcon sx={{ color: theme.palette.text.secondary }} />
                         </InputAdornment>
                       ),
                     }}
@@ -297,14 +270,8 @@ export default function AddCondominioDialog({ open, onClose, onSave }) {
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <FormControl
-                    fullWidth
-                    sx={{ minWidth: 250 }}
-                    variant="outlined"
-                  >
-                    <InputLabel id="reference-select-label">
-                      Condomínio de referência
-                    </InputLabel>
+                  <FormControl fullWidth variant="outlined">
+                    <InputLabel id="reference-select-label">Condomínio de referência</InputLabel>
                     <Select
                       labelId="reference-select-label"
                       id="reference-select"
@@ -312,10 +279,7 @@ export default function AddCondominioDialog({ open, onClose, onSave }) {
                       onChange={handleChange("reference")}
                       label="Condomínio de referência"
                     >
-                      <MenuItem value="">
-                        <em>Nenhum</em>
-                      </MenuItem>
-                      {/* Mapear outras opções aqui, se necessário */}
+                      <MenuItem value=""><em>Nenhum</em></MenuItem>
                     </Select>
                   </FormControl>
                 </Grid>
@@ -326,8 +290,8 @@ export default function AddCondominioDialog({ open, onClose, onSave }) {
 
         <Divider />
 
-        <DialogActions sx={{ p: 2 }}>
-          <Button onClick={handleClose} variant="outlined" color="secondary">
+        <DialogActions sx={{ p: 2, bgcolor: theme.palette.background.default }}>
+          <Button onClick={handleClose} variant="outlined">
             Cancelar
           </Button>
           <Button type="submit" variant="contained" disabled={submitting}>

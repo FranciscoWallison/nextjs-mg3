@@ -1,12 +1,29 @@
-// src/components/AddAtividadeDialog.jsx
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
-  Dialog, DialogTitle, DialogContent, DialogActions,
-  TextField, Button, IconButton, Box, Typography, Grid,
-  FormControl, InputLabel, Select, MenuItem, Switch, FormControlLabel,
-  Autocomplete, InputAdornment, Divider, Paper, Stack, useMediaQuery
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Button,
+  IconButton,
+  Box,
+  Typography,
+  Grid,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Switch,
+  FormControlLabel,
+  Autocomplete,
+  InputAdornment,
+  Divider,
+  Paper,
+  Stack,
+  useMediaQuery,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import CloseIcon from "@mui/icons-material/Close";
@@ -44,13 +61,12 @@ const AddAtividadeDialog = ({
   onSave,
   condominios,
   selectedCondominio,
-  mode = "create",          // "create" | "edit"
-  initialData = null,       // objeto opcional para edição
+  mode = "create",
+  initialData = null,
 }) => {
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
-  // Refs para inputs NÃO-controlados (digitação fica leve)
   const nameRef = useRef(null);
   const typeRef = useRef(null);
   const qtyRef = useRef(null);
@@ -58,7 +74,6 @@ const AddAtividadeDialog = ({
   const locationRef = useRef(null);
   const obsRef = useRef(null);
 
-  // Estado mínimo para itens que fazem sentido controlados
   const [ui, setUi] = useState({
     condominio: null,
     status: true,
@@ -72,7 +87,6 @@ const AddAtividadeDialog = ({
   const [photoPreview, setPhotoPreview] = useState(null);
   const [saving, setSaving] = useState(false);
 
-  // monta defaults quando o diálogo abre (como usamos keepMounted, precisamos setar valor "na mão")
   useEffect(() => {
     if (!open) return;
 
@@ -81,7 +95,6 @@ const AddAtividadeDialog = ({
         (condominios || []).find((c) => c.id === selectedCondominio.id)) || null;
 
     const d = initialData || {};
-    // Preenche campos de texto
     if (nameRef.current) nameRef.current.value = d.name || "";
     if (typeRef.current) typeRef.current.value = d.type || "";
     if (qtyRef.current) qtyRef.current.value = d.quantity != null ? String(d.quantity) : "";
@@ -102,7 +115,6 @@ const AddAtividadeDialog = ({
     setPhotoPreview(null);
   }, [open, initialData, selectedCondominio, condominios]);
 
-  // Preview da imagem
   useEffect(() => {
     if (ui.photo) {
       const url = URL.createObjectURL(ui.photo);
@@ -143,7 +155,6 @@ const AddAtividadeDialog = ({
     const condominioId = ui.condominio?.id || selectedCondominio?.id;
     if (!condominioId) newErrors.condominio = "Selecione um condomínio";
 
-    // number check
     const qty = parseInt(quantityStr || "", 10);
     if (!Number.isFinite(qty) || qty < 1) newErrors.quantity = "Informe um número maior ou igual a 1";
 
@@ -153,13 +164,12 @@ const AddAtividadeDialog = ({
 
   const handleSave = async () => {
     const { ok, qty } = validate();
-    console.log("ok, qty", ok, qty)
     if (!ok) return;
 
     const condominioId = ui.condominio?.id || selectedCondominio?.id;
 
     const payload = {
-      id: initialData?.id, // útil para update
+      id: initialData?.id,
       name: nameRef.current?.value.trim(),
       type: typeRef.current?.value.trim(),
       quantity: qty,
@@ -172,14 +182,10 @@ const AddAtividadeDialog = ({
       tipoAtividade: ui.tipoAtividade,
       observacoes: obsRef.current?.value || "",
       status: ui.status,
-      photoUrl: null, // TODO: upload e setar URL
+      photoUrl: null,
     };
 
-    // Se for criação e você quer usar o default do banco para status, remova-o:
     if (mode === "create") delete payload.status;
-
-    // Não enviamos o arquivo bruto
-    // (suba antes, pegue a URL e preencha photoUrl)
     delete payload.photo;
 
     try {
@@ -213,7 +219,7 @@ const AddAtividadeDialog = ({
         <IconButton
           aria-label="Fechar"
           onClick={onClose}
-          sx={{ position: "absolute", right: 8, top: 8, color: (t) => t.palette.grey[500] }}
+          sx={{ position: "absolute", right: 8, top: 8, color: "text.secondary" }}
         >
           <CloseIcon />
         </IconButton>
@@ -221,7 +227,6 @@ const AddAtividadeDialog = ({
 
       <DialogContent dividers sx={{ p: { xs: 2, sm: 3 } }}>
         <Grid container spacing={2}>
-          {/* Identificação */}
           <Grid item xs={12} md={6}>
             <Section icon={<InfoOutlinedIcon fontSize="small" />} title="Identificação">
               <Grid container spacing={2}>
@@ -272,7 +277,6 @@ const AddAtividadeDialog = ({
             </Section>
           </Grid>
 
-          {/* Localização e condomínio */}
           <Grid item xs={12} md={6}>
             <Section icon={<BusinessIcon fontSize="small" />} title="Localização">
               <Grid container spacing={2}>
@@ -308,7 +312,6 @@ const AddAtividadeDialog = ({
             </Section>
           </Grid>
 
-          {/* Planejamento */}
           <Grid item xs={12} md={6}>
             <Section icon={<ScheduleIcon fontSize="small" />} title="Planejamento">
               <Grid container spacing={2}>
@@ -380,7 +383,6 @@ const AddAtividadeDialog = ({
             </Section>
           </Grid>
 
-          {/* Observações & Status/Foto */}
           <Grid item xs={12} md={6}>
             <Section icon={<InfoOutlinedIcon fontSize="small" />} title="Observações">
               <TextField fullWidth label="Observações" multiline minRows={5} inputRef={obsRef} />
@@ -395,7 +397,7 @@ const AddAtividadeDialog = ({
                         checked={!!ui.status}
                         onChange={handleSwitch}
                         name="status"
-                        color="primary"
+                        color="default"
                       />
                     }
                     label="Em andamento"

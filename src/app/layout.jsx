@@ -1,8 +1,8 @@
-// src/app/layout.jsx
 import { Geist, Geist_Mono } from "next/font/google";
 import "../styles/globals.css";
 import "../styles/swagger-ui.css";
 import { AuthProvider } from "@/contexts/AuthContext";
+import ThemeRegistry from "@/components/ThemeRegistry"; // novo wrapper
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -23,9 +23,11 @@ export default function RootLayout({ children }) {
   return (
     <html lang="pt-BR">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <AuthProvider> {/* <-- 2. Envolva os children com o AuthProvider */}
-          {children}
-        </AuthProvider>
+        <ThemeRegistry>
+          <AuthProvider>
+            {children}
+          </AuthProvider>
+        </ThemeRegistry>
       </body>
     </html>
   );
