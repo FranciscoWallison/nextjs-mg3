@@ -20,7 +20,7 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  FormHelperText,
+  useTheme,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import EditIcon from "@mui/icons-material/Edit";
@@ -49,27 +49,22 @@ export default function EditCondominioDialog({
   onSave,
   condominio,
 }) {
+  const theme = useTheme();
   const { enterCronograma } = useCondominoUI();
-
   const router = useRouter();
   const [values, setValues] = useState(condominio || {});
   const [currentTab, setCurrentTab] = useState(0);
 
   useEffect(() => {
-    if (condominio) {
-      setValues(condominio);
-    }
+    if (condominio) setValues(condominio);
   }, [condominio]);
 
   if (!condominio) return null;
 
-  const handleTabChange = (event, newValue) => {
-    setCurrentTab(newValue);
-  };
+  const handleTabChange = (event, newValue) => setCurrentTab(newValue);
 
-  const handleChange = (field) => (e) => {
+  const handleChange = (field) => (e) =>
     setValues((v) => ({ ...v, [field]: e.target.value }));
-  };
 
   const handleSaveChanges = () => {
     onSave(values);
@@ -86,7 +81,18 @@ export default function EditCondominioDialog({
   };
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
+    <Dialog
+      open={open}
+      onClose={onClose}
+      fullWidth
+      maxWidth="md"
+      PaperProps={{
+        sx: {
+          backgroundColor: theme.palette.background.paper,
+          color: theme.palette.text.primary,
+        },
+      }}
+    >
       <Box
         sx={{
           p: 2,
@@ -107,23 +113,28 @@ export default function EditCondominioDialog({
               height: 60,
               borderRadius: "8px",
               objectFit: "cover",
-              marginRight: "16px",
+              marginRight: 16,
             }}
           />
-          <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+          <Typography
+            variant="h6"
+            sx={{ fontWeight: "bold", color: theme.palette.text.primary }}
+          >
             {values.name}
           </Typography>
         </Box>
-        <IconButton onClick={onClose}>
+        <IconButton sx={{ color: theme.palette.text.secondary }} onClick={onClose}>
           <CloseIcon />
         </IconButton>
       </Box>
 
-      <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+      <Box sx={{ borderBottom: 1, borderColor: theme.palette.divider }}>
         <Tabs
           value={currentTab}
           onChange={handleTabChange}
           aria-label="abas de edição"
+          textColor="inherit"
+          indicatorColor="primary"
         >
           <Tab label="Visão Geral" />
           <Tab label="Anexos" />
@@ -132,10 +143,17 @@ export default function EditCondominioDialog({
       </Box>
 
       <TabPanel value={currentTab} index={0}>
-        <Typography variant="h6" gutterBottom>
+        <Typography variant="h6" gutterBottom color={theme.palette.text.primary}>
           Detalhes do Condomínio
         </Typography>
-        <Paper variant="outlined" sx={{ p: 2 }}>
+        <Paper
+          variant="outlined"
+          sx={{
+            p: 2,
+            backgroundColor: theme.palette.background.paper,
+            color: theme.palette.text.primary,
+          }}
+        >
           <Grid container spacing={2}>
             <Grid item xs={12} sm={6}>
               <TextField
@@ -143,6 +161,7 @@ export default function EditCondominioDialog({
                 value={values.name || ""}
                 onChange={handleChange("name")}
                 fullWidth
+                InputLabelProps={{ style: { color: theme.palette.text.secondary } }}
               />
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -151,6 +170,7 @@ export default function EditCondominioDialog({
                 value={values.cnpj || ""}
                 onChange={handleChange("cnpj")}
                 fullWidth
+                InputLabelProps={{ style: { color: theme.palette.text.secondary } }}
               />
             </Grid>
             <Grid item xs={12}>
@@ -159,6 +179,7 @@ export default function EditCondominioDialog({
                 value={values.address || ""}
                 onChange={handleChange("address")}
                 fullWidth
+                InputLabelProps={{ style: { color: theme.palette.text.secondary } }}
               />
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -167,16 +188,18 @@ export default function EditCondominioDialog({
                 value={values.neighborhood || ""}
                 onChange={handleChange("neighborhood")}
                 fullWidth
+                InputLabelProps={{ style: { color: theme.palette.text.secondary } }}
               />
             </Grid>
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth variant="outlined">
-                <InputLabel id="city-select-label">Cidade</InputLabel>
+                <InputLabel id="city-select-label" sx={{ color: theme.palette.text.secondary }}>
+                  Cidade
+                </InputLabel>
                 <Select
                   labelId="city-select-label"
                   value={values.city || ""}
                   onChange={handleChange("city")}
-                  label="Cidade"
                 >
                   <MenuItem value="">
                     <em>Selecione</em>
@@ -184,19 +207,18 @@ export default function EditCondominioDialog({
                   <MenuItem value="sao_paulo">São Paulo</MenuItem>
                   <MenuItem value="rio">Rio de Janeiro</MenuItem>
                   <MenuItem value="Fortaleza">Fortaleza</MenuItem>
-                  {/* Adicione outras cidades aqui */}
                 </Select>
               </FormControl>
             </Grid>
-
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth variant="outlined">
-                <InputLabel id="state-select-label">Estado</InputLabel>
+                <InputLabel id="state-select-label" sx={{ color: theme.palette.text.secondary }}>
+                  Estado
+                </InputLabel>
                 <Select
                   labelId="state-select-label"
                   value={values.state || ""}
                   onChange={handleChange("state")}
-                  label="Estado"
                 >
                   <MenuItem value="">
                     <em>Selecione</em>
@@ -204,18 +226,18 @@ export default function EditCondominioDialog({
                   <MenuItem value="SP">São Paulo</MenuItem>
                   <MenuItem value="RJ">Rio de Janeiro</MenuItem>
                   <MenuItem value="CE">Ceará</MenuItem>
-                  {/* Adicione outros estados aqui */}
                 </Select>
               </FormControl>
             </Grid>
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth variant="outlined">
-                <InputLabel id="type-select-label">Tipo</InputLabel>
+                <InputLabel id="type-select-label" sx={{ color: theme.palette.text.secondary }}>
+                  Tipo
+                </InputLabel>
                 <Select
                   labelId="type-select-label"
                   value={values.type || ""}
                   onChange={handleChange("type")}
-                  label="Tipo"
                 >
                   <MenuItem value="">
                     <em>Selecione</em>
@@ -227,10 +249,8 @@ export default function EditCondominioDialog({
             </Grid>
           </Grid>
         </Paper>
-        <Box
-          sx={{ mt: 3, display: "flex", justifyContent: "flex-end", gap: 2 }}
-        >
-          {/* <<< MUDANÇA 4: Adicionar o onClick ao botão */}
+
+        <Box sx={{ mt: 3, display: "flex", justifyContent: "flex-end", gap: 2 }}>
           <Button
             variant="contained"
             endIcon={<ArrowForwardIosIcon />}
@@ -250,11 +270,15 @@ export default function EditCondominioDialog({
       </TabPanel>
 
       <TabPanel value={currentTab} index={1}>
-        <Typography>Gerenciamento de Anexos (Em construção)</Typography>
+        <Typography color={theme.palette.text.primary}>
+          Gerenciamento de Anexos (Em construção)
+        </Typography>
       </TabPanel>
 
       <TabPanel value={currentTab} index={2}>
-        <Typography>Anotações (Em construção)</Typography>
+        <Typography color={theme.palette.text.primary}>
+          Anotações (Em construção)
+        </Typography>
       </TabPanel>
     </Dialog>
   );

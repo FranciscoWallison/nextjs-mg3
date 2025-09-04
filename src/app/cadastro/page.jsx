@@ -1,4 +1,3 @@
-// src/app/cadastro/page.jsx
 "use client";
 
 import { useState } from "react";
@@ -11,14 +10,15 @@ import {
   Divider,
   IconButton,
   InputAdornment,
+  useTheme,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
 
 export default function RegisterPage() {
   const router = useRouter();
   const { login } = useAuth();
+  const theme = useTheme();
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -57,12 +57,7 @@ export default function RegisterPage() {
   const handleReturnLogin = (event) => {
     event.preventDefault();
     setError("");
-    try {
-      router.push("/login");
-    } catch (err) {
-      setError(err.message);
-      console.error(err);
-    }
+    router.push("/login");
   };
 
   return (
@@ -71,7 +66,7 @@ export default function RegisterPage() {
         display: "flex",
         flexDirection: { xs: "column", md: "row" },
         height: "100vh",
-        backgroundColor: "#f5f5f5",
+        bgcolor: theme.palette.background.default,
       }}
     >
       <Box
@@ -84,13 +79,16 @@ export default function RegisterPage() {
           flexDirection: "column",
           justifyContent: "center",
           alignItems: "center",
-          backgroundColor: "#ffffff",
+          bgcolor: theme.palette.background.paper,
         }}
       >
         <Box mb={2}>
           <img src="/simple-logo.png" alt="Logo" style={{ width: 100 }} />
         </Box>
-        <Typography variant="h5" sx={{ mb: 2, fontWeight: "bold" }}>
+        <Typography
+          variant="h5"
+          sx={{ mb: 2, fontWeight: "bold", color: theme.palette.text.primary }}
+        >
           Crie sua conta
         </Typography>
 
@@ -102,7 +100,14 @@ export default function RegisterPage() {
           value={name}
           onChange={(e) => setName(e.target.value)}
           required
-          sx={{ maxWidth: 400 }}
+          sx={{
+            maxWidth: 400,
+            "& .MuiOutlinedInput-root": {
+              borderRadius: 2,
+              bgcolor: theme.palette.background.default,
+              color: theme.palette.text.primary,
+            },
+          }}
         />
 
         <TextField
@@ -114,7 +119,14 @@ export default function RegisterPage() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          sx={{ maxWidth: 400 }}
+          sx={{
+            maxWidth: 400,
+            "& .MuiOutlinedInput-root": {
+              borderRadius: 2,
+              bgcolor: theme.palette.background.default,
+              color: theme.palette.text.primary,
+            },
+          }}
         />
 
         <TextField
@@ -126,7 +138,14 @@ export default function RegisterPage() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
-          sx={{ maxWidth: 400 }}
+          sx={{
+            maxWidth: 400,
+            "& .MuiOutlinedInput-root": {
+              borderRadius: 2,
+              bgcolor: theme.palette.background.default,
+              color: theme.palette.text.primary,
+            },
+          }}
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">
@@ -135,6 +154,7 @@ export default function RegisterPage() {
                   onClick={handleClickShowPassword}
                   onMouseDown={handleMouseDownPassword}
                   edge="end"
+                  sx={{ color: theme.palette.text.primary }}
                 >
                   {showPassword ? <VisibilityOff /> : <Visibility />}
                 </IconButton>
@@ -144,11 +164,12 @@ export default function RegisterPage() {
         />
 
         {error && (
-          <Typography color="error" sx={{ mt: 2 }}>
+          <Typography color="error" sx={{ mt: 2, maxWidth: 400 }}>
             {error}
           </Typography>
         )}
 
+        {/* Botão Cadastrar */}
         <Button
           type="submit"
           variant="contained"
@@ -156,19 +177,37 @@ export default function RegisterPage() {
           sx={{
             mt: 3,
             mb: 2,
-            backgroundColor: "#545454",
-            color: "#ffffff",
+            backgroundColor:
+              theme.palette.mode === "light" ? "#545454" : "#ccc",
+            color: theme.palette.getContrastText(
+              theme.palette.mode === "light" ? "#545454" : "#ccc"
+            ),
             fontWeight: "bold",
+            textTransform: "uppercase",
             maxWidth: 400,
             borderRadius: 2,
             padding: "10px 0",
-            "&:hover": { backgroundColor: "#333" },
+            "&:hover": {
+              backgroundColor:
+                theme.palette.mode === "light" ? "#333" : "#999",
+            },
           }}
         >
           CADASTRAR
         </Button>
 
-        <Divider sx={{ my: 2, width: "100%", maxWidth: 400 }}>OU</Divider>
+        <Divider
+          sx={{
+            my: 2,
+            width: "100%",
+            maxWidth: 400,
+            color: theme.palette.text.secondary,
+          }}
+        >
+          OU
+        </Divider>
+
+        {/* Botão Já tenho conta */}
         <Button
           variant="outlined"
           fullWidth
@@ -176,6 +215,8 @@ export default function RegisterPage() {
             maxWidth: 400,
             borderRadius: 2,
             padding: "10px 0",
+            textTransform: "uppercase",
+            fontWeight: "bold",
           }}
           onClick={handleReturnLogin}
         >
@@ -192,7 +233,7 @@ export default function RegisterPage() {
           backgroundPosition: "center",
           height: { xs: 250, md: "auto" },
           minHeight: { xs: 250, md: "100vh" },
-          backgroundColor: "#f5f5f5",
+          bgcolor: theme.palette.background.default,
         }}
       />
     </Box>

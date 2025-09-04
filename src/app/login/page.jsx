@@ -1,7 +1,6 @@
-// src/app/login/page.jsx
 "use client";
 
-import { useState, useEffect } from "react"; // 1. Importar useEffect
+import { useState, useEffect } from "react";
 import {
   TextField,
   Button,
@@ -10,6 +9,8 @@ import {
   Divider,
   Box,
   Typography,
+  useTheme,
+  Paper,
 } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
@@ -17,54 +18,38 @@ import { useAuth } from "@/contexts/AuthContext";
 import Image from "next/image";
 
 export default function LoginPage() {
-  const { login, user, loading } = useAuth(); // 2. Obter user e loading do contexto
+  const { login, user, loading } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const router = useRouter();
+  const theme = useTheme();
 
-  // 3. Adicionar este useEffect para redirecionar se já estiver logado
   useEffect(() => {
-    console.log("loading: ", loading, user);
-    // Apenas redireciona se o estado de autenticação não estiver carregando
     if (!loading && user) {
       router.push("/selecione-o-condominio");
     }
   }, [user, loading, router]);
 
-  const handleClickShowPassword = () => {
-    setShowPassword(!showPassword);
-  };
-
-  const handleMouseDownPassword = (event) => {
-    event.preventDefault();
-  };
+  const handleClickShowPassword = () => setShowPassword(!showPassword);
+  const handleMouseDownPassword = (e) => e.preventDefault();
 
   const handleLogin = async () => {
     setError("");
-
     try {
       await login(email, password);
-      // se chegou aqui, logou com sucesso
       router.push("/selecione-o-condominio");
     } catch (err) {
       setError(err.message);
-      console.error(err);
     }
   };
 
-  const handleCreatAccout = async () => {
+  const handleCreatAccout = () => {
     setError("");
-    try {
-      router.push("/cadastro");
-    } catch (err) {
-      setError(err.message);
-      console.error(err);
-    }
+    router.push("/cadastro");
   };
 
-  // Se estiver carregando ou se o usuário já estiver logado, não renderiza o formulário
   if (loading || user) {
     return (
       <Box
@@ -73,6 +58,7 @@ export default function LoginPage() {
           justifyContent: "center",
           alignItems: "center",
           height: "100vh",
+          bgcolor: theme.palette.background.default,
         }}
       >
         <Image src="/simple-logo.png" alt="Logo" width={150} height={150} />
@@ -86,11 +72,11 @@ export default function LoginPage() {
         display: "flex",
         flexDirection: { xs: "column", md: "row" },
         height: "100vh",
-        backgroundColor: "#f5f5f5",
+        bgcolor: theme.palette.background.default,
       }}
     >
-      {/* Lado esquerdo: Formulário */}
-      <Box
+      <Paper
+        elevation={0}
         sx={{
           flex: 1,
           padding: { xs: 4, md: 6 },
@@ -98,15 +84,13 @@ export default function LoginPage() {
           flexDirection: "column",
           justifyContent: "center",
           alignItems: "center",
-          backgroundColor: "#ffffff",
+          bgcolor: theme.palette.background.paper,
         }}
       >
-        {/* Logo */}
         <Box mb={4}>
           <img src="/simple-logo.png" alt="Logo" style={{ width: 100 }} />
         </Box>
 
-        {/* Inputs */}
         <TextField
           placeholder="Digite seu e-mail"
           variant="outlined"
@@ -116,9 +100,10 @@ export default function LoginPage() {
           onChange={(e) => setEmail(e.target.value)}
           sx={{
             maxWidth: 400,
-            borderRadius: 1,
             "& .MuiOutlinedInput-root": {
               borderRadius: 2,
+              bgcolor: theme.palette.background.default,
+              color: theme.palette.text.primary,
             },
           }}
         />
@@ -133,9 +118,10 @@ export default function LoginPage() {
           onChange={(e) => setPassword(e.target.value)}
           sx={{
             maxWidth: 400,
-            borderRadius: 1,
             "& .MuiOutlinedInput-root": {
               borderRadius: 2,
+              bgcolor: theme.palette.background.default,
+              color: theme.palette.text.primary,
             },
           }}
           InputProps={{
@@ -146,6 +132,7 @@ export default function LoginPage() {
                   onClick={handleClickShowPassword}
                   onMouseDown={handleMouseDownPassword}
                   edge="end"
+                  sx={{ color: theme.palette.text.primary }}
                 >
                   {showPassword ? <VisibilityOff /> : <Visibility />}
                 </IconButton>
@@ -170,14 +157,20 @@ export default function LoginPage() {
           sx={{
             mt: 3,
             mb: 1,
-            backgroundColor: "#545454",
-            color: "#ffffff",
+            backgroundColor:
+              theme.palette.mode === "light" ? "#545454" : "#ccc",
+            color: theme.palette.getContrastText(
+              theme.palette.mode === "light" ? "#545454" : "#ccc"
+            ),
             textTransform: "uppercase",
             fontWeight: "bold",
             maxWidth: 400,
             borderRadius: 2,
             padding: "10px 0",
-            "&:hover": { backgroundColor: "#333" },
+            "&:hover": {
+              backgroundColor:
+                theme.palette.mode === "light" ? "#333" : "#999",
+            },
           }}
           onClick={handleLogin}
         >
@@ -189,7 +182,7 @@ export default function LoginPage() {
           variant="text"
           fullWidth
           sx={{
-            color: "#FF5959",
+            color: theme.palette.error.main,
             textTransform: "uppercase",
             fontWeight: "bold",
             mt: 1,
@@ -199,33 +192,34 @@ export default function LoginPage() {
           Esqueci minha senha
         </Button>
 
-        {/* OU */}
-        <Divider sx={{ my: 3, width: "100%", maxWidth: 400, color: "#BDBDBD" }}>
+        <Divider
+          sx={{
+            my: 3,
+            width: "100%",
+            maxWidth: 400,
+            color: theme.palette.text.secondary,
+          }}
+        >
           OU
         </Divider>
 
         {/* Botão Criar Conta */}
         <Button
-          variant="contained"
+          variant="outlined"
           fullWidth
           sx={{
-            backgroundColor: "#FFFFFF",
-            color: "#000000",
-            border: "1px solid #C4C4C4",
-            textTransform: "uppercase",
-            fontWeight: "bold",
             maxWidth: 400,
             borderRadius: 2,
             padding: "10px 0",
-            "&:hover": { backgroundColor: "#f0f0f0" },
+            textTransform: "uppercase",
+            fontWeight: "bold",
           }}
           onClick={handleCreatAccout}
         >
           NÃO TENHO UMA CONTA
         </Button>
-      </Box>
+      </Paper>
 
-      {/* Lado direito: Imagem */}
       <Box
         sx={{
           flex: 1,
@@ -235,7 +229,7 @@ export default function LoginPage() {
           backgroundPosition: "center",
           height: { xs: 250, md: "auto" },
           minHeight: { xs: 250, md: "100vh" },
-          backgroundColor: "#f5f5f5",
+          bgcolor: theme.palette.background.default,
         }}
       />
     </Box>
