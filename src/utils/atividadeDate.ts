@@ -1,4 +1,5 @@
 import { TaskLike } from "./atividadeStatus";
+import { normalizeFrequency } from "@/utils/frequencias";
 
 type DateInput = string | Date | null | undefined;
 
@@ -66,14 +67,16 @@ const resolveStartDate = (atividade: AtividadeLike): string | null => {
   return toDateString(anchor);
 };
 
-export const adaptAtividadeToTask = (atividade: AtividadeLike): AdaptedTask | null => {
+export const adaptAtividadeToTask = (
+  atividade: AtividadeLike,
+): AdaptedTask | null => {
   const startDate = resolveStartDate(atividade);
   if (!startDate) return null;
 
   return {
     id: atividade.id,
     name: atividade.name,
-    frequency: atividade.frequencia ?? "Não se repete",
+    frequency: normalizeFrequency(atividade.frequencia),
     startDate,
     condominioName: atividade?.condominio?.name ?? null,
     raw: atividade,
